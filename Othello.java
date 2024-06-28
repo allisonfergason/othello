@@ -10,6 +10,13 @@ public class Othello {
     static int twopoints = 2;
     static int impossible = 0;
     static int computerPoints;
+
+
+    /**
+     * Main method to facilitate gameplay for both single and double player. 
+     * 
+     * @param args 
+     */
     public static void main(String[] args) {
         Scanner scn = new Scanner(System.in);
 
@@ -204,18 +211,31 @@ public class Othello {
         System.out.println("Thanks for playing!");
     }
 
-    // create new board 
+    
+    /**
+     * Creates a new board with the starting configuration of two white pieces
+     * and two black pieces in the middle of the board. Gameboard is represented as a 
+     * 2D integer array, where 1 is black and 2 is white, as player 1 will play with 
+     * black and player 2 will play with white. 
+     */
     public static void createBoard() {
         gameBoard = new int[8][8];
 
+        // black pieces added
         gameBoard[3][4] = 1;
         gameBoard[4][3] = 1;
 
+        // white pieces added
         gameBoard[3][3] = 2;
         gameBoard[4][4] = 2;
     }
 
-    // draw board
+    /**
+     * Prints the gameboard to the screen using character arrays. Replaces the Xs with spaces if
+     * there is no piece in a space yet, B for black, or W for white. 
+     * 
+     * @param gameBoard 2D array containing the current configuration of the pieces. 
+     */
     public static void drawBoard(int[][] gameBoard) {
         char[][] board = {
             "╔═══════════════════════════════╗".toCharArray(),
@@ -235,13 +255,18 @@ public class Othello {
             "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
             "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
             "╚═══════════════════════════════╝".toCharArray()};
-        // insert stuff to interate through each space and replace X 
-        // with B or W
+
+        // loop to iterate through each space and replace it with the proper
+        // piece representation
         int rowCount = 0;
         int colCount = 0;
         for (int j=1; j<16; j+=2) {
             for (int i=2; i<31; i+=4 ) {
+
+                // retrieves value (either 0, 1, or 2) from the input array
                 int value = gameBoard[rowCount][colCount];
+
+                // 2 is white, 1 is black, and 0 is blank
                 if (value == 2) {
                     board[j][i] = 'W';
                 }
@@ -256,22 +281,30 @@ public class Othello {
             colCount = 0;
             rowCount++;
         }
-        // print board
+
+        // print board to screen
         for (char[] row : board){
             String stringrow = String.valueOf(row);
             System.out.println(stringrow);
         } 
     }
 
-    // reset board
+    /**
+     * Clear the board by changing all values in the gameboard to zero. 
+     */
     public void clearBoard() {
         Arrays.fill(gameBoard, 0);
     }
 
-    // show points method
+    /**
+     * Print the number of points for each player to the screen, using their names and
+     * the point counters. 
+     */
     public static void showPoints() {
         String pone = " points";
         String ptwo = " points.";
+
+        // account for the possibility of having one point
         if (onepoints == 1) {
             pone = " point";
         }
@@ -281,18 +314,30 @@ public class Othello {
         System.out.println(player1+" has "+onepoints+pone+" and "+player2+ " has "+twopoints+ptwo);
     }
 
-    // player move method 
+    /**
+     * Makes the player's move. First checks if the move is valid and then edits the gameboard
+     * to reflect that.
+     * 
+     * @param move String version of the move
+     * @return whether the move was successful
+     */
     public static boolean makeMove(String move) {
         int row;
         int col;
+        // try to convert the String to a row and col integer,
+        // if unsuccessful return
         try {
             String[] moveArr = move.split(" ");
+            // the row and column are given from 1-8 instead of 0-7, so 1 is subtracted
+            // to get the array index
             row = Integer.valueOf(moveArr[0])-1;
             col = Integer.valueOf(moveArr[1])-1;
         }
         catch (NumberFormatException e) {
             return false;
         }
+
+        // check if the move is valid and change the board if so
         boolean success = validMove(row, col);
         if (success) {
             gameBoard[row][col] = player;
@@ -300,17 +345,36 @@ public class Othello {
         return success;
     }
 
-    // is valid move method
+    /**
+     * Checks if a move is valid by checking if the coordinates are on the board,
+     * if the given space is empty, and if any tiles will be flipped by the move. 
+     * Flipping at least one tile is required for a valid move.
+     * 
+     * @param row row where the move is to be made
+     * @param col column where the move is to be made
+     * @return whether the move is valid
+     */
     public static boolean validMove(int row, int col) {
         if (!onBoard(row, col)) {
             return false;
         }
+
+        // check if the space is empty and then check if there are tiles flipped
         if (gameBoard[row][col] != 0 || !flipTiles(row, col, true)) {
             return false;
         }
         return true;
     } 
 
+    /**
+     * Checks if the given move will flip any tiles, and flips those tiles if the flip parameter
+     * is true. If it is false it will only check that those tiles may be flipped if the move is made. 
+     * 
+     * @param row row where the move is to be made
+     * @param col column where the move is to be made
+     * @param flip whether or not to actually flip the tiles, i.e. is the move actually being made
+     * @return whether or not there were tiles flipped with the given move
+     */
     public static boolean flipTiles(int row, int col, boolean flip) {
         int[][] directions = {{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}};
         int other;
@@ -439,7 +503,10 @@ public class Othello {
         return false;
     } 
 
-    // print rules method
+    /**
+     * Prints the rules of the game when requested. These are directly sourced from the World Othello Federation's
+     * website. 
+     */
     public static void printRules() {
         System.out.println();
         System.out.println();
