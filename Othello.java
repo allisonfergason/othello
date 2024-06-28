@@ -8,12 +8,11 @@ public class Othello {
     static String player2;
     static int onepoints = 2;
     static int twopoints = 2;
-    static int impossible = 0;
     static int computerPoints;
 
 
     /**
-     * Main method to facilitate gameplay for both single and double player. 
+     * Main method to facilitate gameplay for either one or two players. 
      * 
      * @param args 
      */
@@ -22,7 +21,7 @@ public class Othello {
 
         createBoard();
         
-        // decide mode
+        // ask the player if they want to play in single or double player mode
         System.out.println("Welcome to Othello!");
         System.out.println();
         System.out.println
@@ -59,6 +58,9 @@ public class Othello {
         drawBoard(gameBoard);
         System.out.println(); 
 
+        // counter for the number of turns there has been without a possible move
+        int impossibleTurns = 0;
+
         // one player mode
         while (mode.equals("one")) {
 
@@ -67,25 +69,29 @@ public class Othello {
 
             // check if a turn is possible
             if (!possibleTurn()) {
-                impossible++;
-                if (impossible == 1) {
+
+                // increment counter 
+                impossibleTurns++;
+                if (impossibleTurns == 1) {
                     System.out.println("There are currently no possible moves and the turn will be skipped.");
                     continue;
                 }
-                else if (impossible == 2) {
+                else if (impossibleTurns == 2) {
                     System.out.println("There are no possible moves for either player and the game is over.");
                     break;
                 }
             }
             else {
-                impossible = 0;
+                impossibleTurns = 0;
             }
 
+            // for the user's turn
             if (player==1) {
                 System.out.println();
-                System.out.println("Where would you like to place your piece? Enter a row and column separated by a space, or 'help' for the rules.");
+                System.out.println
+                    ("Where would you like to place your piece? Enter a row and column separated by a space, or 'help' for the rules.");
                 String move = scn.nextLine();
-                while (move.length() > 3 || move.length() < 3) {
+                while (move.length() != 3) {
                     if (move.equals("help")) {
                         printRules();
                         System.out.println();
@@ -97,6 +103,7 @@ public class Othello {
                         move = scn.nextLine();
                     }
                 }
+
                 // check for validity and make the move
                 while (!makeMove(move)) {
                     System.out.println("Invalid move, please enter another move, or 'help' for the rules.");
@@ -136,25 +143,25 @@ public class Othello {
 
             // check if a turn is possible
             if (!possibleTurn()) {
-                impossible++;
-                if (impossible == 1) {
+                impossibleTurns++;
+                if (impossibleTurns == 1) {
                     System.out.println("There are currently no possible moves and the turn will be skipped.");
                     continue;
                 }
-                else if (impossible == 2) {
+                else if (impossibleTurns == 2) {
                     System.out.println("There are no possible moves for either player and the game is over.");
                     break;
                 }
             }
             else {
-                impossible = 0;
+                impossibleTurns = 0;
             }
             
             // get the player's move
             System.out.println();
             System.out.println("Where would you like to place your piece? Enter a row and column separated by a space, or 'help' for the rules.");
             String move = scn.nextLine();
-            while (move.length() > 3 || move.length() < 3) {
+            while (move.length() != 3) {
                 if (move.equals("help")) {
                     printRules();
                     System.out.println();
@@ -376,28 +383,42 @@ public class Othello {
      * @return whether or not there were tiles flipped with the given move
      */
     public static boolean flipTiles(int row, int col, boolean flip) {
+
+        // 2D array representing eight possible directions to move in
         int[][] directions = {{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}};
+        
+        // find the opposing player 
         int other;
         if (player==1) {
             other = 2;
         }
         else { other = 1;}
 
+        // flag will change to true if pieces that can be flipped are found
         boolean flag = false;
+        // points tracker
         int points = 0;
 
+        // note starting row and column 
         int rstart = row;
         int cstart = col;
 
+        // loop through each possible direction to test for tiles to flip
         for (int[] dir : directions) {
+
+            // edit the current coordinate in the desired direction
             row += dir[0];
             col += dir[1];
+
+            // if the spot next to the intended move is occupied by an opposing tile continue
             if (onBoard(row, col) && gameBoard[row][col]==other) {
                 row += dir[0];
                 col += dir[1];
                 if (!onBoard(row, col)) {
                     continue;
                 }
+                // keep moving in this direction until the current spot is not
+                // occupied by an opposing tile
                 while (gameBoard[row][col]==other) {
                     row += dir[0];
                     col += dir[1];
@@ -405,9 +426,12 @@ public class Othello {
                         break;
                     }
                 }
+                // once stopped, check if still on the board
                 if (!onBoard(row, col)) {
                     continue;
                 }
+                // if stopped on the current player's tile, flips can be made
+                // backtrack, flip tiles to current player's color, and count points 
                 if (gameBoard[row][col]==player) {
                     while (true) {
                         row -= dir[0];
@@ -428,22 +452,37 @@ public class Othello {
         }
 
         computerPoints = points;
-        updatePoints(points, flip);
+        if (flip==true) {
+            updatePoints(points);
+        }
         return flag;  
     }
 
-    public static void updatePoints(int points, boolean flip) {
-        if (player==1 && flip==true) {
+    /**
+     * Updates points if the move was actually made. Added to current player
+     * and subtracted from other player. 
+     * 
+     * @param points number of tiles flipped.
+     * @param flip whether the tiles are actually flipped
+     */
+    public static void updatePoints(int points) {
+        if (player==1) {
             onepoints += points + 1;
             twopoints -= points;
         }
-        else if (player==2 && flip==true) {
+        else {
             twopoints += points + 1;
             onepoints -= points;
         }
     }
 
-    // check if a coordinate is on the board
+    /**
+     * Checks if a move is within the 8x8 board
+     * 
+     * @param row row index
+     * @param col column index
+     * @return whether the move is valid
+     */
     public static boolean onBoard(int row, int col) {
         if (row < 0 || col < 0) {
             return false;
@@ -456,7 +495,10 @@ public class Othello {
         }
     }
 
-    // computer move method 
+    /**
+     * Goes through all possible moves, checks which will flip the most tiles,
+     * and makes that move
+     */
     public static void computerMove() {
         int max = -1;
         String move = "";
@@ -479,7 +521,9 @@ public class Othello {
         makeMove(move);
     }
 
-    // two players who's turn is it method
+    /**
+     * Prints whose turn it is currently and switches to the next player
+     */
     public static void whoseTurn() {
         if (player == 1) {
             player = 2;
@@ -491,10 +535,14 @@ public class Othello {
         }
     }
 
-    // is there a possible turn
+    /*
+     * checks if there is a possible turn for the current player by interating
+     * through the board
+     */
     public static boolean possibleTurn() {
         for (int i=0; i<8; i++) {
             for (int j=0; j<8; j++) {
+                // check if the spot is empty and has tiles that could be flipped
                 if (gameBoard[i][j]==0 && flipTiles(i, j, false)) {
                     return true;
                 }
