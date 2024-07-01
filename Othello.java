@@ -1,8 +1,6 @@
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Othello {
-    static int[][] gameBoard;
     static int player = 2;
     static String player1;
     static String player2;
@@ -19,9 +17,10 @@ public class Othello {
     public static void main(String[] args) {
         Scanner scn = new Scanner(System.in);
 
-        createBoard();
+        GameBoard gb = new GameBoard();
         
         // ask the player if they want to play in single or double player mode
+        System.out.println();
         System.out.println("Welcome to Othello!");
         System.out.println();
         System.out.println
@@ -55,7 +54,7 @@ public class Othello {
         // show starting board
         System.out.println();
         System.out.println("Here is the starting board:");
-        drawBoard(gameBoard);
+        gb.drawBoard();
         System.out.println(); 
 
         // counter for the number of turns there has been without a possible move
@@ -68,7 +67,7 @@ public class Othello {
             whoseTurn();
 
             // check if a turn is possible
-            if (!possibleTurn()) {
+            if (!possibleTurn(gb)) {
 
                 // increment counter 
                 impossibleTurns++;
@@ -93,7 +92,7 @@ public class Othello {
                 String move = scn.nextLine();
                 while (move.length() != 3) {
                     if (move.equals("help")) {
-                        printRules();
+                        printRules(gb);
                         System.out.println();
                         System.out.println("Please enter your move.");
                         move = scn.nextLine();
@@ -105,11 +104,11 @@ public class Othello {
                 }
 
                 // check for validity and make the move
-                while (!makeMove(move)) {
+                while (!makeMove(move, gb)) {
                     System.out.println("Invalid move, please enter another move, or 'help' for the rules.");
                     move = scn.nextLine();
                     if (move.equals("help")) {
-                        printRules();
+                        printRules(gb);
                         System.out.println("Please enter your move.");
                         move = scn.nextLine();
                     }
@@ -117,12 +116,12 @@ public class Othello {
             }
             else {
                 System.out.println("The computer will now make a move.");
-                computerMove();
+                computerMove(gb);
             }
 
             // print current board and score
             System.out.println();
-            drawBoard(gameBoard);
+            gb.drawBoard();
             System.out.println();
             showPoints();
 
@@ -142,7 +141,7 @@ public class Othello {
             whoseTurn();
 
             // check if a turn is possible
-            if (!possibleTurn()) {
+            if (!possibleTurn(gb)) {
                 impossibleTurns++;
                 if (impossibleTurns == 1) {
                     System.out.println("There are currently no possible moves and the turn will be skipped.");
@@ -163,7 +162,7 @@ public class Othello {
             String move = scn.nextLine();
             while (move.length() != 3) {
                 if (move.equals("help")) {
-                    printRules();
+                    printRules(gb);
                     System.out.println();
                     System.out.println("Please enter your move.");
                     move = scn.nextLine();
@@ -174,11 +173,11 @@ public class Othello {
                 }
             }
             // check for validity and make the move
-            while (!makeMove(move)) {
+            while (!makeMove(move, gb)) {
                 System.out.println("Invalid move, please enter another move, or 'help' for the rules.");
                 move = scn.nextLine();
                 if (move.equals("help")) {
-                    printRules();
+                    printRules(gb);
                     System.out.println("Please enter your move.");
                     move = scn.nextLine();
                 }
@@ -186,7 +185,7 @@ public class Othello {
 
             // print current board and score
             System.out.println();
-            drawBoard(gameBoard);
+            gb.drawBoard();
             System.out.println();
             showPoints();
 
@@ -218,91 +217,6 @@ public class Othello {
         System.out.println("Thanks for playing!");
     }
 
-    
-    /**
-     * Creates a new board with the starting configuration of two white pieces
-     * and two black pieces in the middle of the board. Gameboard is represented as a 
-     * 2D integer array, where 1 is black and 2 is white, as player 1 will play with 
-     * black and player 2 will play with white. 
-     */
-    public static void createBoard() {
-        gameBoard = new int[8][8];
-
-        // black pieces added
-        gameBoard[3][4] = 1;
-        gameBoard[4][3] = 1;
-
-        // white pieces added
-        gameBoard[3][3] = 2;
-        gameBoard[4][4] = 2;
-    }
-
-    /**
-     * Prints the gameboard to the screen using character arrays. Replaces the Xs with spaces if
-     * there is no piece in a space yet, B for black, or W for white. 
-     * 
-     * @param gameBoard 2D array containing the current configuration of the pieces. 
-     */
-    public static void drawBoard(int[][] gameBoard) {
-        char[][] board = {
-            "╔═══════════════════════════════╗".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "║───┼───┼───┼───┼───┼───┼───┼───║".toCharArray(),
-            "║ X │ X │ X │ X │ X │ X │ X │ X ║".toCharArray(),
-            "╚═══════════════════════════════╝".toCharArray()};
-
-        // loop to iterate through each space and replace it with the proper
-        // piece representation
-        int rowCount = 0;
-        int colCount = 0;
-        for (int j=1; j<16; j+=2) {
-            for (int i=2; i<31; i+=4 ) {
-
-                // retrieves value (either 0, 1, or 2) from the input array
-                int value = gameBoard[rowCount][colCount];
-
-                // 2 is white, 1 is black, and 0 is blank
-                if (value == 2) {
-                    board[j][i] = 'W';
-                }
-                else if (value==1) {
-                    board[j][i] = 'B';
-                }
-                else {
-                    board[j][i] = ' ';
-                }
-                colCount++;
-            }
-            colCount = 0;
-            rowCount++;
-        }
-
-        // print board to screen
-        for (char[] row : board){
-            String stringrow = String.valueOf(row);
-            System.out.println(stringrow);
-        } 
-    }
-
-    /**
-     * Clear the board by changing all values in the gameboard to zero. 
-     */
-    public void clearBoard() {
-        Arrays.fill(gameBoard, 0);
-    }
-
     /**
      * Print the number of points for each player to the screen, using their names and
      * the point counters. 
@@ -328,7 +242,7 @@ public class Othello {
      * @param move String version of the move
      * @return whether the move was successful
      */
-    public static boolean makeMove(String move) {
+    public static boolean makeMove(String move, GameBoard gBoard) {
         int row;
         int col;
         // try to convert the String to a row and col integer,
@@ -345,9 +259,9 @@ public class Othello {
         }
 
         // check if the move is valid and change the board if so
-        boolean success = validMove(row, col);
+        boolean success = validMove(row, col, gBoard);
         if (success) {
-            gameBoard[row][col] = player;
+            gBoard.changeSpot(row, col, player);
         }
         return success;
     }
@@ -361,13 +275,13 @@ public class Othello {
      * @param col column where the move is to be made
      * @return whether the move is valid
      */
-    public static boolean validMove(int row, int col) {
+    public static boolean validMove(int row, int col, GameBoard gb) {
         if (!onBoard(row, col)) {
             return false;
         }
 
         // check if the space is empty and then check if there are tiles flipped
-        if (gameBoard[row][col] != 0 || !flipTiles(row, col, true)) {
+        if (gb.checkSpot(row, col) != 0 || !flipTiles(row, col, true, gb)) {
             return false;
         }
         return true;
@@ -382,7 +296,7 @@ public class Othello {
      * @param flip whether or not to actually flip the tiles, i.e. is the move actually being made
      * @return whether or not there were tiles flipped with the given move
      */
-    public static boolean flipTiles(int row, int col, boolean flip) {
+    public static boolean flipTiles(int row, int col, boolean flip, GameBoard gBoard) {
 
         // 2D array representing eight possible directions to move in
         int[][] directions = {{0,1}, {1,1}, {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}};
@@ -411,7 +325,7 @@ public class Othello {
             col += dir[1];
 
             // if the spot next to the intended move is occupied by an opposing tile continue
-            if (onBoard(row, col) && gameBoard[row][col]==other) {
+            if (onBoard(row, col) && gBoard.checkSpot(row, col)==other) {
                 row += dir[0];
                 col += dir[1];
                 if (!onBoard(row, col)) {
@@ -419,7 +333,7 @@ public class Othello {
                 }
                 // keep moving in this direction until the current spot is not
                 // occupied by an opposing tile
-                while (gameBoard[row][col]==other) {
+                while (gBoard.checkSpot(row, col)==other) {
                     row += dir[0];
                     col += dir[1];
                     if (!onBoard(row, col)) {
@@ -432,7 +346,7 @@ public class Othello {
                 }
                 // if stopped on the current player's tile, flips can be made
                 // backtrack, flip tiles to current player's color, and count points 
-                if (gameBoard[row][col]==player) {
+                if (gBoard.checkSpot(row, col)==player) {
                     while (true) {
                         row -= dir[0];
                         col -= dir[1];
@@ -440,7 +354,8 @@ public class Othello {
                             break;
                         }
                         if (flip==true) {
-                            gameBoard[row][col] = player;
+                            gBoard.changeSpot(row, col, player);
+
                         }
                         points++;
                         flag = true;
@@ -499,14 +414,14 @@ public class Othello {
      * Goes through all possible moves, checks which will flip the most tiles,
      * and makes that move
      */
-    public static void computerMove() {
+    public static void computerMove(GameBoard gb) {
         int max = -1;
         String move = "";
 
         // run through all possible moves and check which flips most opposing tiles
         for (int i=0; i<8; i++) {
             for (int j=0; j<8; j++) {
-                if (gameBoard[i][j]==0 && flipTiles(i, j, false)) {
+                if (gb.checkSpot(i,j)==0 && flipTiles(i, j, false, gb)) {
                     if (computerPoints > max) {
                         max = computerPoints;
                         int r = i + 1;
@@ -518,7 +433,7 @@ public class Othello {
         }
 
         // make move
-        makeMove(move);
+        makeMove(move, gb);
     }
 
     /**
@@ -539,11 +454,11 @@ public class Othello {
      * checks if there is a possible turn for the current player by interating
      * through the board
      */
-    public static boolean possibleTurn() {
+    public static boolean possibleTurn(GameBoard gb) {
         for (int i=0; i<8; i++) {
             for (int j=0; j<8; j++) {
                 // check if the spot is empty and has tiles that could be flipped
-                if (gameBoard[i][j]==0 && flipTiles(i, j, false)) {
+                if (gb.checkSpot(i, j)==0 && flipTiles(i, j, false, gb)) {
                     return true;
                 }
             }
@@ -555,14 +470,14 @@ public class Othello {
      * Prints the rules of the game when requested. These are directly sourced from the World Othello Federation's
      * website. 
      */
-    public static void printRules() {
+    public static void printRules(GameBoard gb) {
         System.out.println();
         System.out.println();
         System.out.println("Rules sourced from World Othello Federation.");
         System.out.println("Each player takes 32 discs and chooses one colour to use throughout the game. Black places two black discs");
         System.out.println("and White places two white discs as shown below.");
         System.out.println();
-        drawBoard(gameBoard);
+        gb.drawBoard();
         System.out.println();
         System.out.println("A move consists of 'outflanking' your opponent's disc(s), then flipping the outflanked disc(s)to your colour.");
         System.out.println("To outflank means to place a disc on the board so that your opponent's row (or rows) of disc(s) is bordered at each");
