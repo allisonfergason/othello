@@ -2,12 +2,9 @@ import java.util.Scanner;
 
 public class Othello {
     static int player = 2;
-    static String player1;
-    static String player2;
-    static int onepoints = 2;
-    static int twopoints = 2;
     static int computerPoints;
-
+    static Player p1;
+    static Player p2;
 
     /**
      * Main method to facilitate gameplay for either one or two players. 
@@ -35,19 +32,23 @@ public class Othello {
         if (mode.equals("one")) {
             System.out.println();
             System.out.println("Please enter your name: ");
-            player1 = scn.nextLine();
-            player2 = "Baba Burtis";
+            String player1 = scn.nextLine();
+            p1 = new Player(player1);
+            String player2 = "Baba Burtis";
+            p2 = new Player(player2);
             System.out.println("Welcome, "+player1+"! You will be playing against "+player2+".");
             System.out.println();
             System.out.println("Press enter to continue onto the game.");
             scn.nextLine();
         }
-        else if (mode.equals("two")) {
+        else {
             System.out.println();
             System.out.println("Please enter the name of the first player: ");
-            player1 = scn.nextLine();
+            String player1 = scn.nextLine();
+            p1 = new Player(player1);
             System.out.println("Please enter the name of the second player: ");
-            player2 = scn.nextLine();
+            String player2 = scn.nextLine();
+            p2 = new Player(player2);
             System.out.println();
         }
 
@@ -201,14 +202,14 @@ public class Othello {
         scn.close();
         // end statement 
         System.out.println();
-        System.out.println("The final score was "+onepoints+" to "+twopoints+".");
-        if (onepoints > twopoints) {
-            System.out.println(player1+" won!");
+        System.out.println("The final score was "+p1.getPoints()+" to "+p2.getPoints()+".");
+        if (p1.getPoints() > p2.getPoints()) {
+            System.out.println(p1.getName()+" won!");
         }
-        else if (onepoints < twopoints) {
-            System.out.print(player2+" won! ");
-            if (player2.equals("Baba Burtis")) {
-                System.out.println("-500 aura for "+player1);
+        else if (p1.getPoints() < p2.getPoints()) {
+            System.out.print(p2.getName()+" won! ");
+            if (p2.getName().equals("Baba Burtis")) {
+                System.out.println("-500 aura for "+p1.getName());
             }
         }
         else {
@@ -226,13 +227,13 @@ public class Othello {
         String ptwo = " points.";
 
         // account for the possibility of having one point
-        if (onepoints == 1) {
+        if (p1.getPoints() == 1) {
             pone = " point";
         }
-        if (twopoints == 1) {
+        if (p2.getPoints() == 1) {
             ptwo = " point.";
         }
-        System.out.println(player1+" has "+onepoints+pone+" and "+player2+ " has "+twopoints+ptwo);
+        System.out.println(p1.getName()+" has "+p1.getPoints()+pone+" and "+p2.getName()+ " has "+p2.getPoints()+ptwo);
     }
 
     /**
@@ -382,12 +383,12 @@ public class Othello {
      */
     public static void updatePoints(int points) {
         if (player==1) {
-            onepoints += points + 1;
-            twopoints -= points;
+            p1.changePoints(points + 1);
+            p2.changePoints(points*-1);
         }
         else {
-            twopoints += points + 1;
-            onepoints -= points;
+            p2.changePoints(points + 1);
+            p1.changePoints(points*-1);
         }
     }
 
@@ -442,11 +443,11 @@ public class Othello {
     public static void whoseTurn() {
         if (player == 1) {
             player = 2;
-            System.out.println("It is "+player2+"'s turn.");
+            System.out.println("It is "+p2.getName()+"'s turn.");
         }
         else {
             player = 1;
-            System.out.println("It is "+player1+"'s turn.");
+            System.out.println("It is "+p1.getName()+"'s turn.");
         }
     }
 
